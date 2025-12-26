@@ -7,13 +7,12 @@ def svd_compress_channel(channel_2d: np.ndarray, k: int) -> np.ndarray:
     returns: (H, W) float array reconstructed from rank-k SVD
     """
     U, S, Vt = np.linalg.svd(channel_2d, full_matrices=False)
-    k = max(1, min(k, S.shape[0]))  # clamp k to valid range
+    k = max(1, min(k, S.shape[0]))
 
-    # Rank-k reconstruction: U_k @ diag(S_k) @ Vt_k
     Uk = U[:, :k]
     Sk = S[:k]
     Vtk = Vt[:k, :]
-    return Uk @ (Sk[:, None] * Vtk)  # diag(Sk) multiplication without forming diag
+    return Uk @ (Sk[:, None] * Vtk)
 
 
 def compress_image_svd(input_path: str, output_path: str, k: int) -> None:
@@ -23,18 +22,17 @@ def compress_image_svd(input_path: str, output_path: str, k: int) -> None:
     """
     img = Image.open(input_path)
 
-    # Work in either grayscale or RGB
     if img.mode not in ("L", "RGB"):
         img = img.convert("RGB")
 
     arr = np.asarray(img).astype(np.float32)
 
-    if arr.ndim == 2:  # grayscale (H, W)
+    if arr.ndim == 2:  
         recon = svd_compress_channel(arr, k)
         recon = np.clip(recon, 0, 255).astype(np.uint8)
         out = Image.fromarray(recon, mode="L")
 
-    else:  # RGB (H, W, 3)
+    else:
         channels = []
         for c in range(3):
             recon_c = svd_compress_channel(arr[:, :, c], k)
@@ -60,15 +58,13 @@ def estimate_storage_ratio(h: int, w: int, k: int, rgb: bool) -> float:
 
 
 if __name__ == "__main__":
-    # Example:
-    # Try k=5, 20, 50, 100 and compare quality/size.
+
     input_path = "input.jpg"
     output_path = "compressed_k50.png"
     k = 50
 
     compress_image_svd(input_path, output_path, k)
 
-    # Print an approximate storage ratio (array storage, not PNG/JPEG compression)
     img = Image.open(input_path)
     rgb = (img.convert("RGB").mode == "RGB")
     w, h = img.size
