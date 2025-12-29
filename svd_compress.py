@@ -60,7 +60,7 @@ def estimate_storage_ratio(h: int, w: int, k: int, rgb: bool) -> float:
 if __name__ == "__main__":
 
     input_path = "input.jpg"
-    output_path = "compressed_k50.png"
+    output_path = "compressed.png"
     k = 50
 
     compress_image_svd(input_path, output_path, k)
